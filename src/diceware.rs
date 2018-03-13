@@ -1,6 +1,7 @@
-use std::error::Error;
+use std::error;
 use std::fmt;
 use std::fs::File;
+use std::io;
 use std::io::prelude::*;
 use std::path::Path;
 
@@ -32,25 +33,70 @@ enum WordList<'a> {
 }
 
 impl<'a> WordList<'a> {
-    fn get(&self) -> Result<Vec<String>, Box<Error>> {
+    fn get(&self) -> Result<Vec<String>> {
         match *self {
             WordList::File(filename) => get_wordlist(filename),
         }
     }
 }
 
+pub type Result<T> = ::std::result::Result<T, Error>;
+
 #[derive(Debug)]
-enum WordListError {
+pub enum Error {
+    Io(io::Error),
+    WordList(WordListError),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Error::Io(ref err) => err.fmt(f),
+            Error::WordList(ref err) => err.fmt(f),
+        }
+    }
+}
+
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        match *self {
+            Error::Io(ref err) => err.description(),
+            Error::WordList(ref err) => err.description(),
+        }
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        match *self {
+            Error::Io(ref err) => Some(err),
+            Error::WordList(ref err) => Some(err),
+        }
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(err: io::Error) -> Error {
+        Error::Io(err)
+    }
+}
+
+impl From<WordListError> for Error {
+    fn from(err: WordListError) -> Error {
+        Error::WordList(err)
+    }
+}
+
+#[derive(Debug)]
+pub enum WordListError {
     InvalidLength,
 }
 
 impl fmt::Display for WordListError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "{}", "Word list: invalid length")
     }
 }
 
-impl Error for WordListError {
+impl error::Error for WordListError {
     fn description(&self) -> &str {
         match *self {
             WordListError::InvalidLength => "Word list: invalid length",
@@ -58,7 +104,7 @@ impl Error for WordListError {
     }
 }
 
-pub fn make_passphrase(config: Config) -> Result<String, Box<Error>> {
+pub fn make_passphrase(config: Config) -> Result<String> {
     let word_list = config.word_list.get()?;
     let mut passphrase = String::new();
 
@@ -85,15 +131,12 @@ pub fn make_passphrase(config: Config) -> Result<String, Box<Error>> {
     Ok(passphrase)
 }
 
-fn get_wordlist<P>(filename: P) -> Result<Vec<String>, Box<Error>>
-where
-    P: AsRef<Path>,
-{
+fn get_wordlist<P: AsRef<Path>>(filename: P) -> Result<Vec<String>> {
     let mut content = String::new();
     File::open(filename)?.read_to_string(&mut content)?;
 
     if content.lines().count() != 7776 {
-        return Err(Box::new(WordListError::InvalidLength));
+        return Err(From::from(WordListError::InvalidLength));
     }
 
     let word_list = content.lines().map(String::from).collect();
