@@ -1,8 +1,8 @@
-use std::fs::File;
-use std::path::Path;
-use std::io::prelude::*;
 use std::error::Error;
 use std::fmt;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 
 use rand;
 use rand::Rng;
@@ -33,8 +33,8 @@ enum WordList<'a> {
 
 impl<'a> WordList<'a> {
     fn get(&self) -> Result<Vec<String>, Box<Error>> {
-        match self {
-            &WordList::File(filename) => get_wordlist(filename),
+        match *self {
+            WordList::File(filename) => get_wordlist(filename),
         }
     }
 }

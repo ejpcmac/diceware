@@ -7,6 +7,7 @@ extern crate rand;
 mod diceware;
 
 use std::process;
+
 use clap::{App, Arg};
 use diceware::Config;
 
