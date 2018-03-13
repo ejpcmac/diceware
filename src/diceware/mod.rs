@@ -1,12 +1,13 @@
-use std::error;
-use std::fmt;
 use std::fs::File;
-use std::io;
 use std::io::prelude::*;
 use std::path::Path;
 
 use rand;
 use rand::Rng;
+
+pub use self::error::{Error, Result, WordListError};
+
+mod error;
 
 pub struct Config<'a> {
     word_list: WordList<'a>,
@@ -40,70 +41,6 @@ impl<'a> WordList<'a> {
     }
 }
 
-pub type Result<T> = ::std::result::Result<T, Error>;
-
-#[derive(Debug)]
-pub enum Error {
-    Io(io::Error),
-    WordList(WordListError),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::Io(ref err) => err.fmt(f),
-            Error::WordList(ref err) => err.fmt(f),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::Io(ref err) => err.description(),
-            Error::WordList(ref err) => err.description(),
-        }
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            Error::Io(ref err) => Some(err),
-            Error::WordList(ref err) => Some(err),
-        }
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Error {
-        Error::Io(err)
-    }
-}
-
-impl From<WordListError> for Error {
-    fn from(err: WordListError) -> Error {
-        Error::WordList(err)
-    }
-}
-
-#[derive(Debug)]
-pub enum WordListError {
-    InvalidLength,
-}
-
-impl fmt::Display for WordListError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", "Word list: invalid length")
-    }
-}
-
-impl error::Error for WordListError {
-    fn description(&self) -> &str {
-        match *self {
-            WordListError::InvalidLength => "Word list: invalid length",
-        }
-    }
-}
-
 pub fn make_passphrase(config: Config) -> Result<String> {
     let word_list = config.word_list.get()?;
     let mut passphrase = String::new();
@@ -131,7 +68,10 @@ pub fn make_passphrase(config: Config) -> Result<String> {
     Ok(passphrase)
 }
 
-fn get_wordlist<P: AsRef<Path>>(filename: P) -> Result<Vec<String>> {
+fn get_wordlist<P>(filename: P) -> Result<Vec<String>>
+where
+    P: AsRef<Path>,
+{
     let mut content = String::new();
     File::open(filename)?.read_to_string(&mut content)?;
 
