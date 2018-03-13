@@ -2,6 +2,7 @@ use std::fs::File;
 use std::path::Path;
 use std::io::prelude::*;
 use std::error::Error;
+use std::fmt;
 
 use rand;
 use rand::Rng;
@@ -34,6 +35,25 @@ impl<'a> WordList<'a> {
     fn get(&self) -> Result<Vec<String>, Box<Error>> {
         match self {
             &WordList::File(filename) => get_wordlist(filename),
+        }
+    }
+}
+
+#[derive(Debug)]
+enum WordListError {
+    InvalidLength,
+}
+
+impl fmt::Display for WordListError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.description())
+    }
+}
+
+impl Error for WordListError {
+    fn description(&self) -> &str {
+        match *self {
+            WordListError::InvalidLength => "Word list: invalid length",
         }
     }
 }
@@ -71,14 +91,12 @@ where
 {
     let mut content = String::new();
     File::open(filename)?.read_to_string(&mut content)?;
-    let lines = content.lines();
 
-    // TODO: Handle lines.length() != 7776.
-    // if lines.count() != 7776 {
-    //     return Err();
-    // }
+    if content.lines().count() != 7776 {
+        return Err(Box::new(WordListError::InvalidLength));
+    }
 
-    let word_list = lines.map(String::from).collect();
+    let word_list = content.lines().map(String::from).collect();
 
     Ok(word_list)
 }
