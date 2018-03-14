@@ -13,7 +13,7 @@ mod diceware;
 
 fn main() {
     let matches = App::new("diceware")
-        .version("1.0.0")
+        .version("1.0.0-dev")
         .author("Jean-Philippe Cugnet <jean-philippe@cugnet.eu>")
         .about("A diceware passphrase generator")
         .arg(

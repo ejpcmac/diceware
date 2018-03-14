@@ -1,6 +1,6 @@
 [package]
 name = "diceware"
-version = "0.1.0-dev"
+version = "1.0.0-dev"
 authors = ["Jean-Philippe Cugnet <jean-philippe@cugnet.eu>"]
 
 [dependencies]
