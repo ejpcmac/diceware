@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -5,7 +6,7 @@ use std::path::Path;
 use rand;
 use rand::Rng;
 
-use self::WordListError::InvalidLength;
+use self::WordListError::{DuplicateWord, InvalidLength};
 pub use self::error::{Error, Result, WordListError};
 
 mod error;
@@ -36,9 +37,22 @@ enum WordList<'a> {
 
 impl<'a> WordList<'a> {
     fn get(&self) -> Result<Vec<String>> {
-        match *self {
-            WordList::File(filename) => get_wordlist(filename),
+        let word_list = match *self {
+            WordList::File(filename) => get_wordlist(filename)?,
+        };
+
+        // Add a block to limit the scope of the &word_list borrow.
+        {
+            // Check the list for duplicates.
+            let mut hash_list = HashSet::<&str>::new();
+            for word in &word_list {
+                if !hash_list.insert(word) {
+                    return Err(Error::WordList(DuplicateWord(word.clone())));
+                }
+            }
         }
+
+        Ok(word_list)
     }
 }
 

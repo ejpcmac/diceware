@@ -51,6 +51,7 @@ impl From<WordListError> for Error {
 #[derive(Debug)]
 pub enum WordListError {
     InvalidLength(usize),
+    DuplicateWord(String),
 }
 
 impl fmt::Display for WordListError {
@@ -58,6 +59,10 @@ impl fmt::Display for WordListError {
         match *self {
             WordListError::InvalidLength(ref length) => {
                 write!(f, "Word list: invalid length ({})", length)
+            }
+
+            WordListError::DuplicateWord(ref word) => {
+                write!(f, "Word list: {}: duplicate word", word)
             }
         }
     }
@@ -67,6 +72,7 @@ impl error::Error for WordListError {
     fn description(&self) -> &str {
         match *self {
             WordListError::InvalidLength(_) => "Invalid word list length",
+            WordListError::DuplicateWord(_) => "Duplicate word in the list",
         }
     }
 }
