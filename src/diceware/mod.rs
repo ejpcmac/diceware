@@ -10,6 +10,12 @@ use self::WordListError::{DuplicateWord, InvalidLength};
 pub use self::error::{Error, Result, WordListError};
 
 mod error;
+mod embedded;
+
+pub enum EmbeddedList {
+    EN,
+    FR,
+}
 
 pub struct Config<'a> {
     word_list: WordList<'a>,
@@ -29,16 +35,30 @@ impl<'a> Config<'a> {
             with_special_char,
         }
     }
+
+    pub fn with_embedded(
+        list: EmbeddedList,
+        words: usize,
+        with_special_char: bool,
+    ) -> Config<'a> {
+        Config {
+            word_list: WordList::Embedded(list),
+            words,
+            with_special_char,
+        }
+    }
 }
 
 enum WordList<'a> {
     File(&'a str),
+    Embedded(EmbeddedList),
 }
 
 impl<'a> WordList<'a> {
     fn get(&self) -> Result<Vec<String>> {
         let word_list = match *self {
             WordList::File(filename) => get_wordlist(filename)?,
+            WordList::Embedded(ref list) => get_embedded_list(list),
         };
 
         // Add a block to limit the scope of the &word_list borrow.
@@ -97,4 +117,13 @@ where
 
     let word_list = content.lines().map(String::from).collect();
     Ok(word_list)
+}
+
+fn get_embedded_list(list: &EmbeddedList) -> Vec<String> {
+    let word_list = match *list {
+        EmbeddedList::EN => &embedded::EN,
+        EmbeddedList::FR => &embedded::FR,
+    };
+
+    word_list.iter().map(|&w| String::from(w)).collect()
 }
