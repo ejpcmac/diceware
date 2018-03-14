@@ -4,12 +4,12 @@
 extern crate clap;
 extern crate rand;
 
-mod diceware;
-
 use std::process;
 
 use clap::{App, Arg};
-use diceware::Config;
+use diceware::{Config, Error};
+
+mod diceware;
 
 fn main() {
     let matches = App::new("diceware")
@@ -43,9 +43,12 @@ fn main() {
 
     match diceware::make_passphrase(config) {
         Ok(passphrase) => println!("{}", passphrase),
-        Err(e) => {
-            // TODO: Better error messages.
-            eprintln!("Error: {}", e);
+        Err(err) => {
+            match err {
+                Error::IO(ref e) => eprintln!("Error: {}: {}", filename, e),
+                Error::WordList(ref e) => eprintln!("Error: {}", e),
+            }
+
             process::exit(1);
         }
     };
