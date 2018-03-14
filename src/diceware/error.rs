@@ -50,14 +50,14 @@ impl From<WordListError> for Error {
 
 #[derive(Debug)]
 pub enum WordListError {
-    InvalidLength,
+    InvalidLength(usize),
 }
 
 impl fmt::Display for WordListError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            WordListError::InvalidLength => {
-                write!(f, "Word list: invalid length")
+            WordListError::InvalidLength(ref length) => {
+                write!(f, "Word list: invalid length ({})", length)
             }
         }
     }
@@ -66,7 +66,7 @@ impl fmt::Display for WordListError {
 impl error::Error for WordListError {
     fn description(&self) -> &str {
         match *self {
-            WordListError::InvalidLength => "Invalid word list length",
+            WordListError::InvalidLength(_) => "Invalid word list length",
         }
     }
 }

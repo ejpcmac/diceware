@@ -5,6 +5,7 @@ use std::path::Path;
 use rand;
 use rand::Rng;
 
+use self::WordListError::InvalidLength;
 pub use self::error::{Error, Result, WordListError};
 
 mod error;
@@ -75,11 +76,11 @@ where
     let mut content = String::new();
     File::open(filename)?.read_to_string(&mut content)?;
 
-    if content.lines().count() != 7776 {
-        return Err(From::from(WordListError::InvalidLength));
+    let length = content.lines().count();
+    if length != 7776 {
+        return Err(Error::WordList(InvalidLength(length)));
     }
 
     let word_list = content.lines().map(String::from).collect();
-
     Ok(word_list)
 }
