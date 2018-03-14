@@ -12,14 +12,14 @@ mod error;
 
 pub struct Config<'a> {
     word_list: WordList<'a>,
-    words: u32,
+    words: usize,
     with_special_char: bool,
 }
 
 impl<'a> Config<'a> {
     pub fn with_filename(
         filename: &'a str,
-        words: u32,
+        words: usize,
         with_special_char: bool,
     ) -> Config<'a> {
         Config {

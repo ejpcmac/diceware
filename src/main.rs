@@ -36,7 +36,7 @@ fn main() {
 
     // Use of `unwrap` is OK since this value is required.
     let filename = matches.value_of("word_list").unwrap();
-    let words = value_t_or_exit!(matches, "words", u32);
+    let words = value_t_or_exit!(matches, "words", usize);
     let with_special_chars = matches.is_present("with-special-char");
 
     let config = Config::with_filename(filename, words, with_special_chars);
