@@ -79,13 +79,11 @@ impl<'a> WordList<'a> {
 
 pub fn make_passphrase(config: Config) -> Result<String> {
     let word_list = config.word_list.get()?;
-    let mut passphrase = String::new();
 
-    for _ in 0..config.words {
-        let word = rand::thread_rng().choose(&word_list).unwrap();
-        passphrase.push_str(word);
-        passphrase.push_str(" ");
-    }
+    let mut rng = rand::thread_rng();
+    let mut passphrase = (0..config.words).fold(String::new(), |s, _| {
+        s + rng.choose(&word_list).unwrap() + " "
+    });
 
     // Pop the trailing space.
     passphrase.pop();
