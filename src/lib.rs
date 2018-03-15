@@ -7,8 +7,8 @@ use std::path::Path;
 
 use rand::Rng;
 
-use self::WordListError::{DuplicateWord, InvalidLength};
-pub use self::error::{Error, Result, WordListError};
+use self::WordListError::*;
+pub use self::error::*;
 
 mod error;
 mod embedded;
