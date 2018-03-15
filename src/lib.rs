@@ -1,9 +1,10 @@
+extern crate rand;
+
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-use rand;
 use rand::Rng;
 
 use self::WordListError::{DuplicateWord, InvalidLength};
@@ -90,8 +91,9 @@ pub fn make_passphrase(config: Config) -> Result<String> {
     passphrase.pop();
 
     if config.with_special_char {
-        let chars: Vec<char> =
-            "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789".chars().collect();
+        let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
+            .chars()
+            .collect();
 
         let c = rand::thread_rng().choose(&chars).unwrap();
 
@@ -125,5 +127,8 @@ fn get_embedded_list(list: &EmbeddedList) -> Vec<String> {
         EmbeddedList::FR => &embedded::FR,
     };
 
-    word_list.iter().map(|&w| String::from(w)).collect()
+    word_list
+        .iter()
+        .map(|&w| String::from(w))
+        .collect()
 }

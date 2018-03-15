@@ -2,14 +2,12 @@
 
 #[macro_use]
 extern crate clap;
-extern crate rand;
+extern crate diceware;
 
 use std::process;
 
 use clap::{App, Arg, ArgGroup};
 use diceware::{Config, EmbeddedList, Error};
-
-mod diceware;
 
 fn main() {
     let matches = App::new("diceware")
