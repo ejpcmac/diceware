@@ -119,6 +119,7 @@ use std::io::prelude::*;
 use std::path::Path;
 
 use rand::Rng;
+use rand::os::OsRng;
 
 use self::WordListError::*;
 pub use self::error::*;
@@ -255,9 +256,9 @@ impl<'a> WordList<'a> {
 /// };
 /// ```
 pub fn make_passphrase(config: Config) -> Result<String> {
-    let word_list = config.word_list.get()?;
+    let mut rng = OsRng::new().unwrap();
 
-    let mut rng = rand::thread_rng();
+    let word_list = config.word_list.get()?;
     let mut passphrase = (0..config.words).fold(String::new(), |s, _| {
         s + rng.choose(&word_list).unwrap() + " "
     });
@@ -270,10 +271,10 @@ pub fn make_passphrase(config: Config) -> Result<String> {
             .chars()
             .collect();
 
-        let c = rand::thread_rng().choose(&chars).unwrap();
+        let c = rng.choose(&chars).unwrap();
 
         // TODO: Avoid len().
-        let position = rand::thread_rng().gen_range(0, passphrase.len());
+        let position = rng.gen_range(0, passphrase.len());
         passphrase.insert(position, *c);
     }
 
