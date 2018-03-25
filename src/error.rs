@@ -3,11 +3,18 @@ use std::fmt;
 use std::io;
 use std::result;
 
+/// Short hand for the
+/// [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html) type.
 pub type Result<T> = result::Result<T, Error>;
 
+/// Diceware errors.
 #[derive(Debug)]
 pub enum Error {
+    /// IO errors, typically encountered when trying to read a word list from a
+    /// file.
     IO(io::Error),
+
+    /// Word list errors, encountered when the word list is invalid.
     WordList(WordListError),
 }
 
@@ -48,9 +55,13 @@ impl From<WordListError> for Error {
     }
 }
 
+/// Word list errors.
 #[derive(Debug)]
 pub enum WordListError {
+    /// Error for when the word list is not 7776-word long.
     InvalidLength(usize),
+
+    /// Error for when the word list contains duplicates.
     DuplicateWord(String),
 }
 

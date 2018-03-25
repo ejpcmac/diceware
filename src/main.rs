@@ -1,5 +1,3 @@
-//! A diceware passphrase generator.
-
 #[macro_use]
 extern crate clap;
 extern crate diceware;
@@ -13,7 +11,7 @@ fn main() {
     let matches = App::new("diceware")
         .version("1.0.0-dev")
         .author("Jean-Philippe Cugnet <jean-philippe@cugnet.eu>")
-        .about("A diceware passphrase generator")
+        .about("A Diceware passphrase generator")
         .arg(
             Arg::with_name("word_file")
                 .short("f")
