@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate clap;
 extern crate diceware;
 
@@ -12,6 +11,11 @@ fn main() {
         .version("1.0.0-dev")
         .author("Jean-Philippe Cugnet <jean-philippe@cugnet.eu>")
         .about("A Diceware passphrase generator")
+        .arg(
+            Arg::with_name("words")
+                .help("The number of words to gerenerate")
+                .required(true),
+        )
         .arg(
             Arg::with_name("word_file")
                 .short("f")
@@ -41,15 +45,20 @@ fn main() {
                 .short("s")
                 .help("Adds a special character to the passphrase"),
         )
-        .arg(
-            Arg::with_name("words")
-                .help("The number of words to gerenerate")
-                .required(true),
-        )
         .get_matches();
 
+    let words_str = matches.value_of("words").unwrap();
+    let words = words_str.parse().unwrap_or_else(|_| {
+        eprintln!(
+            "Error: `{}` is not a valid number of words. Please use an integer \
+            instead.",
+            words_str
+        );
+
+        process::exit(1);
+    });
+
     let word_file = matches.value_of("word_file");
-    let words = value_t_or_exit!(matches, "words", usize);
     let with_special_char = matches.is_present("with-special-char");
 
     let config = if let Some(filename) = word_file {
