@@ -259,12 +259,10 @@ pub fn make_passphrase(config: Config) -> Result<String> {
     let mut rng = OsRng::new().unwrap();
 
     let word_list = config.word_list.get()?;
-    let mut passphrase = (0..config.words).fold(String::new(), |s, _| {
-        s + rng.choose(&word_list).unwrap() + " "
-    });
-
-    // Pop the trailing space.
-    passphrase.pop();
+    let mut passphrase = (0..config.words)
+        .map(|_| rng.choose(&word_list).unwrap().as_ref())
+        .collect::<Vec<&str>>()
+        .join(" ");
 
     if config.with_special_char {
         let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
