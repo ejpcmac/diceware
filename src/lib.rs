@@ -13,16 +13,17 @@
 //! # Features
 //!
 //! This Diceware implementation enables to generate passphrases from a Diceware
-//! word list, with an optional special character insered at any position. This
-//! differs from the dice version, where the special character can be inserted
-//! only in the six first characters of the six first words.
+//! word list, with an optional special character insered at any position in any
+//! word. This differs from the dice version, where the special character can be
+//! inserted only in the six first characters of the six first words.
 //!
 //! This implementation embeds two word lists:
 //!
 //!   * the original Diceware list,
 //!   * the French word list from
 //!     [Matthieu Weber](http://weber.fi.eu.org/index.shtml.en#projects), with
-//!     `Église` changed to `Eglise` to avoid encoding issues.
+//!     `Église` changed to `Eglise` to avoid encoding and keyboard
+//!     accessibility issues.
 //!
 //! In addition to these lists, you can use any other list from a text file
 //! featuring a word by line. A word list **must** contain exactly 7776 *unique*
@@ -112,6 +113,7 @@
 //! ```
 
 extern crate rand;
+extern crate unicode_segmentation;
 
 use std::collections::HashSet;
 use std::fs::File;
@@ -120,6 +122,8 @@ use std::path::Path;
 
 use rand::Rng;
 use rand::os::OsRng;
+
+use unicode_segmentation::UnicodeSegmentation;
 
 use self::WordListError::*;
 pub use self::error::*;
@@ -258,11 +262,15 @@ impl<'a> WordList<'a> {
 pub fn make_passphrase(config: Config) -> Result<String> {
     let mut rng = OsRng::new().unwrap();
 
+    // We need to declare this mutable string before `word_list` if we want to
+    // use it to replace a word with its version containing a special character.
+    let mut word = String::new();
+
     let word_list = config.word_list.get()?;
-    let mut passphrase = (0..config.words)
-        .map(|_| rng.choose(&word_list).unwrap().as_ref())
-        .collect::<Vec<&str>>()
-        .join(" ");
+    let mut words: Vec<&str> = (0..config.words)
+        .map(|_| rng.choose(&word_list).unwrap())
+        .map(AsRef::as_ref)
+        .collect();
 
     if config.with_special_char {
         let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
@@ -271,10 +279,20 @@ pub fn make_passphrase(config: Config) -> Result<String> {
 
         let c = rng.choose(&chars).unwrap();
 
-        // TODO: Avoid len().
-        let position = rng.gen_range(0, passphrase.len());
-        passphrase.insert(position, *c);
+        let word_idx = rng.gen_range(0, words.len());
+        word.push_str(words[word_idx]);
+
+        let indices: Vec<usize> = word.grapheme_indices(true)
+            .map(|(i, _)| i)
+            .collect();
+
+        let idx = rng.choose(&indices).unwrap();
+
+        word.insert(*idx, *c);
+        words[word_idx] = &word;
     }
+
+    let passphrase = words.join(" ");
 
     Ok(passphrase)
 }

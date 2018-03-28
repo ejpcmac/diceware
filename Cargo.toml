@@ -6,3 +6,4 @@ authors = ["Jean-Philippe Cugnet <jean-philippe@cugnet.eu>"]
 [dependencies]
 clap = "~2.30.0"
 rand = "0.4.2"
+unicode-segmentation = "1.2.0"
