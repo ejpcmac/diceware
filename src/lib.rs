@@ -214,7 +214,7 @@ impl<'a> WordList<'a> {
             WordList::Embedded(ref list) => get_embedded_list(list),
         };
 
-        // Add a block to limit the scope of the &word_list borrow.
+        // This block limits the scope of the &word_list borrow.
         {
             // Check the list for duplicates.
             let mut hash_list = HashSet::<&str>::new();
