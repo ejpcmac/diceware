@@ -41,26 +41,34 @@
 //! The simplest way to use the `diceware` binary is to just pass the number of
 //! desired words as an argument:
 //!
-//!     $ diceware 8
-//!     save andrew liar grater keys chad poetry stole
+//! ```sh
+//! $ diceware 8
+//! save andrew liar grater keys chad poetry stole
+//! ```
 //!
 //! In this case, the embedded original Diceware list is used and no special
 //! character is added.
 //!
 //! To add a special character, add the `-s` switch:
 //!
-//!     $ diceware -s 8
-//!     clerk ion ruddy aid gauss wino listen fl>o
+//! ```sh
+//! $ diceware -s 8
+//! clerk ion ruddy aid gauss wino listen fl>o
+//! ```
 //!
 //! To use the embedded French word list, use `--fr`:
 //!
-//!     $ diceware --fr 8
-//!     jarret papa cv asti brin coron rente don
+//! ```sh
+//! $ diceware --fr 8
+//! jarret papa cv asti brin coron rente don
+//! ```
 //!
 //! You can also use any external word list:
 //!
-//!     $ diceware 8 -f word_list.txt
-//!     yah omaha aiken wood noble shoot devil filch
+//! ```sh
+//! $ diceware 8 -f word_list.txt
+//! yah omaha aiken wood noble shoot devil filch
+//! ```
 //!
 //! ## As a library
 //!
@@ -73,13 +81,13 @@
 //!
 //! Then, add this to your crate root:
 //!
-//! ```
+//! ```rust
 //! extern crate diceware;
 //! ```
 //!
 //! ### Example
 //!
-//! ```
+//! ```rust
 //! use diceware::{Config, EmbeddedList, Error};
 //!
 //! // First, generate a config. You can generate one with an embedded list,
@@ -161,7 +169,9 @@ impl<'a> Config<'a> {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust
+    /// use diceware::Config;
+    ///
     /// // Create a configuration to generate 8 words with a special char,
     /// // using the word list in words.txt:
     /// let config = Config::with_filename("words.txt", 8, true);
@@ -182,7 +192,9 @@ impl<'a> Config<'a> {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust
+    /// use diceware::{Config, EmbeddedList};
+    ///
     /// // Create a configuration to generate 6 words without a special char,
     /// // using the embedded French word list:
     /// let config = Config::with_embedded(EmbeddedList::FR, 6, false);
@@ -233,17 +245,23 @@ impl<'a> WordList<'a> {
 ///
 /// # Example
 ///
-/// ```
+/// ```rust
+/// use diceware::{Config, EmbeddedList};
+///
 /// // Make an 8-word passphrase from the embedded English list.
 /// let config = Config::with_embedded(EmbeddedList::EN, 8, false);
-/// let passphrase = make_passphrase(config).unwrap();
+/// let passphrase = diceware::make_passphrase(config).unwrap();
 /// ```
 ///
 /// If the list can generate an error, like when you use an external list or
 /// if you don’t trust the embedded lists, you can match them:
 ///
-/// ```
-/// match make_passphrase(config) {
+/// ```rust
+/// use diceware::{Config, EmbeddedList, Error};
+///
+/// let filename = "words.txt";
+/// let config = Config::with_filename(filename, 8, false);
+/// match diceware::make_passphrase(config) {
 ///     Ok(passphrase) => println!("{}", passphrase),
 ///
 ///     Err(err) => {
