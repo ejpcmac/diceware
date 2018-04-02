@@ -344,3 +344,54 @@ fn get_embedded_list(list: &EmbeddedList) -> Vec<String> {
         .map(|&w| String::from(w))
         .collect()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn makes_a_passphrase() {
+        let config = Config::with_embedded(EmbeddedList::EN, 20, false);
+        let result = make_passphrase(config);
+
+        assert!(result.is_ok());
+        assert!(
+            result
+                .unwrap()
+                .split_whitespace()
+                .all(|w| embedded::EN.contains(&w))
+        );
+    }
+
+    #[test]
+    fn makes_a_passphrase_with_special_char() {
+        let config = Config::with_embedded(EmbeddedList::EN, 20, true);
+        let result = make_passphrase(config);
+
+        assert!(result.is_ok());
+
+        let passphrase = result.unwrap();
+        let not_in_wordlist: Vec<&str> = passphrase
+            .split_whitespace()
+            .filter(|w| !embedded::EN.contains(&w))
+            .collect();
+
+        assert_eq!(not_in_wordlist.len(), 1);
+
+        let word_with_char = not_in_wordlist[0];
+        let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
+            .chars()
+            .collect();
+
+        assert!(word_with_char.char_indices().any(|(i, c)| {
+            if chars.contains(&c) {
+                let mut word = word_with_char.to_owned();
+                word.remove(i);
+
+                embedded::EN.contains(&word.as_ref())
+            } else {
+                false
+            }
+        }));
+    }
+}
