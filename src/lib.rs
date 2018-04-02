@@ -13,9 +13,9 @@
 //! # Features
 //!
 //! This Diceware implementation enables to generate passphrases from a Diceware
-//! word list, with an optional special character insered at any position in any
-//! word. This differs from the dice version, where the special character can be
-//! inserted only in the six first characters of the six first words.
+//! word list, with an optional special character inserted at any position in
+//! any word. This differs from the dice version, where the special character
+//! can be inserted only in the six first characters of the six first words.
 //!
 //! This implementation embeds two word lists:
 //!
@@ -26,7 +26,7 @@
 //!     accessibility issues.
 //!
 //! In addition to these lists, you can use any other list from a text file
-//! featuring a word by line. A word list **must** contain exactly 7776 *unique*
+//! featuring a word by line. A word list **must** contain exactly 7776 unique
 //! words.
 //!
 //! Before each passphrase generation, the chosen word list is checked so that
@@ -49,7 +49,7 @@
 //! In this case, the embedded original Diceware list is used and no special
 //! character is added.
 //!
-//! To add a special character, add the `-s` switch:
+//! To add a special character, use the `-s` switch:
 //!
 //! ```sh
 //! $ diceware -s 8

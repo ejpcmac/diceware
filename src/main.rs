@@ -13,7 +13,7 @@ fn main() {
         .about("A Diceware passphrase generator")
         .arg(
             Arg::with_name("words")
-                .help("The number of words to gerenerate")
+                .help("The number of words to generate")
                 .required(true),
         )
         .arg(
