@@ -16,6 +16,9 @@ pub enum Error {
 
     /// Word list errors, encountered when the word list is invalid.
     WordList(WordListError),
+
+    /// Error for when the number of words to generate is 0.
+    NoWords,
 }
 
 impl fmt::Display for Error {
@@ -23,6 +26,7 @@ impl fmt::Display for Error {
         match *self {
             Error::IO(ref err) => err.fmt(f),
             Error::WordList(ref err) => err.fmt(f),
+            Error::NoWords => write!(f, "No words to generate"),
         }
     }
 }
@@ -32,6 +36,7 @@ impl error::Error for Error {
         match *self {
             Error::IO(ref err) => err.description(),
             Error::WordList(ref err) => err.description(),
+            Error::NoWords => "No words to generate",
         }
     }
 
@@ -39,6 +44,7 @@ impl error::Error for Error {
         match *self {
             Error::IO(ref err) => Some(err),
             Error::WordList(ref err) => Some(err),
+            Error::NoWords => None,
         }
     }
 }

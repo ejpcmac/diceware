@@ -115,6 +115,10 @@
 //!             // its length is different than 7776 words or it contains
 //!             // duplicates.
 //!             Error::WordList(ref e) => eprintln!("Error: {}", e),
+//!
+//!             // No words errors can occur if the number of words to generate
+//!             // is 0.
+//!             Error::NoWords => eprintln!("Error: {}", err),
 //!         }
 //!     }
 //! };
@@ -122,6 +126,10 @@
 
 extern crate rand;
 extern crate unicode_segmentation;
+
+#[cfg(test)]
+#[macro_use]
+extern crate proptest;
 
 use std::collections::HashSet;
 use std::fs::File;
@@ -140,6 +148,7 @@ mod embedded;
 mod error;
 
 /// The list of embedded word lists.
+#[derive(Clone, Debug)]
 pub enum EmbeddedList {
     /// The original English Diceware word list.
     EN,
@@ -273,11 +282,19 @@ impl<'a> WordList<'a> {
 ///             // its length is different than 7776 words or it contains
 ///             // duplicates.
 ///             Error::WordList(ref e) => eprintln!("Error: {}", e),
+///
+///             // No words errors can occur if the number of words to generate
+///             // is 0.
+///             Error::NoWords => eprintln!("Error: {}", err),
 ///         }
 ///     }
 /// };
 /// ```
 pub fn make_passphrase(config: Config) -> Result<String> {
+    if config.words < 1 {
+        return Err(Error::NoWords);
+    }
+
     let mut rng = OsRng::new().unwrap();
 
     // We need to declare this mutable string before `word_list` if we want to
@@ -334,64 +351,99 @@ where
 
 /// Gets an embedded word list.
 fn get_embedded_list(list: &EmbeddedList) -> Vec<String> {
-    let word_list = match *list {
-        EmbeddedList::EN => &embedded::EN,
-        EmbeddedList::FR => &embedded::FR,
-    };
-
-    word_list
+    embedded_list(list)
         .iter()
         .map(|&w| String::from(w))
         .collect()
 }
 
+/// Gets the corresponding embedded word list.
+fn embedded_list(list: &EmbeddedList) -> &[&str; 7776] {
+    match *list {
+        EmbeddedList::EN => &embedded::EN,
+        EmbeddedList::FR => &embedded::FR,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proptest::prelude::*;
+    use std::error::Error;
 
-    #[test]
-    fn makes_a_passphrase() {
-        let config = Config::with_embedded(EmbeddedList::EN, 20, false);
-        let result = make_passphrase(config);
-
-        assert!(result.is_ok());
-        assert!(
-            result
-                .unwrap()
-                .split_whitespace()
-                .all(|w| embedded::EN.contains(&w))
-        );
+    /// Arbitrary embedded word list generator.
+    fn arb_list() -> BoxedStrategy<EmbeddedList> {
+        prop_oneof![Just(EmbeddedList::EN), Just(EmbeddedList::FR)].boxed()
     }
 
     #[test]
-    fn makes_a_passphrase_with_special_char() {
-        let config = Config::with_embedded(EmbeddedList::EN, 20, true);
+    fn returns_an_error_if_number_of_words_is_zero() {
+        let config = Config::with_embedded(EmbeddedList::FR, 0, false);
         let result = make_passphrase(config);
 
-        assert!(result.is_ok());
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().description(),
+            "No words to generate"
+        );
+    }
 
-        let passphrase = result.unwrap();
-        let not_in_wordlist: Vec<&str> = passphrase
-            .split_whitespace()
-            .filter(|w| !embedded::EN.contains(&w))
-            .collect();
+    proptest! {
+        #![proptest_config(proptest::test_runner::Config::with_cases(100))]
+        #[test]
+        fn makes_a_passphrase(ref list in arb_list(), n in 1..50usize) {
+            let word_list = embedded_list(list);
 
-        assert_eq!(not_in_wordlist.len(), 1);
+            let config = Config::with_embedded(list.clone(), n, false);
+            let result = make_passphrase(config);
 
-        let word_with_char = not_in_wordlist[0];
-        let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
-            .chars()
-            .collect();
+            prop_assert!(result.is_ok());
+            prop_assert!(
+                result
+                    .unwrap()
+                    .split_whitespace()
+                    .all(|w| word_list.contains(&w))
+            );
+        }
+    }
 
-        assert!(word_with_char.char_indices().any(|(i, c)| {
-            if chars.contains(&c) {
-                let mut word = word_with_char.to_owned();
-                word.remove(i);
+    proptest!{
+        #![proptest_config(proptest::test_runner::Config::with_cases(100))]
+        #[test]
+        fn makes_a_passphrase_with_special_char(
+            ref list in arb_list(),
+            n in 1..50usize
+        ) {
+            let word_list = embedded_list(list);
 
-                embedded::EN.contains(&word.as_ref())
-            } else {
-                false
-            }
-        }));
+            let config = Config::with_embedded(list.clone(), n, true);
+            let result = make_passphrase(config);
+
+            prop_assert!(result.is_ok());
+
+            let passphrase = result.unwrap();
+            let not_in_wordlist: Vec<&str> = passphrase
+                .split_whitespace()
+                .filter(|w| !word_list.contains(&w))
+                .collect();
+
+            prop_assert_eq!(not_in_wordlist.len(), 1);
+
+            let word_with_char = not_in_wordlist[0];
+            let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
+                .chars()
+                .collect();
+
+            assert!(word_with_char.char_indices().any(|(i, c)| {
+                if chars.contains(&c) {
+                    let mut word = word_with_char.to_owned();
+                    word.remove(i);
+
+                    word_list.contains(&word.as_ref())
+                } else {
+                    false
+                }
+            }));
+        }
     }
 }

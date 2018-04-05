@@ -84,6 +84,7 @@ fn main() {
                 }
 
                 Error::WordList(ref e) => eprintln!("Error: {}", e),
+                Error::NoWords => eprintln!("Error: {}", err),
             }
 
             process::exit(1);
