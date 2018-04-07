@@ -1,6 +1,7 @@
 [package]
 name = "diceware"
 version = "1.0.0-dev"
+license = "GPL-3.0"
 authors = ["Jean-Philippe Cugnet <jean-philippe@cugnet.eu>"]
 
 [dependencies]
