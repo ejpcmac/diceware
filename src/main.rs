@@ -24,7 +24,7 @@ use diceware::{Config, EmbeddedList, Error};
 
 fn main() {
     let matches = App::new("diceware")
-        .version("1.0.0-dev")
+        .version("1.0.0")
         .author("Jean-Philippe Cugnet <jean-philippe@cugnet.eu>")
         .about("A Diceware passphrase generator")
         .arg(
