@@ -24,7 +24,7 @@ use diceware::{Config, EmbeddedList, Error};
 
 fn main() {
     let matches = App::new("diceware")
-        .version("1.0.0")
+        .version("1.0.1")
         .author("Jean-Philippe Cugnet <jean-philippe@cugnet.eu>")
         .about("A Diceware passphrase generator")
         .arg(
@@ -95,11 +95,11 @@ fn main() {
         Ok(passphrase) => println!("{}", passphrase),
         Err(err) => {
             match err {
-                Error::IO(ref e) => {
+                Error::IO(e) => {
                     eprintln!("Error: {}: {}", word_file.unwrap(), e)
                 }
 
-                Error::WordList(ref e) => eprintln!("Error: {}", e),
+                Error::WordList(e) => eprintln!("Error: {}", e),
                 Error::NoWords => eprintln!("Error: {}", err),
             }
 

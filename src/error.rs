@@ -39,9 +39,9 @@ pub enum Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::IO(ref err) => err.fmt(f),
-            Error::WordList(ref err) => err.fmt(f),
+        match self {
+            Error::IO(err) => err.fmt(f),
+            Error::WordList(err) => err.fmt(f),
             Error::NoWords => write!(f, "No words to generate"),
         }
     }
@@ -49,17 +49,17 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {
     fn description(&self) -> &str {
-        match *self {
-            Error::IO(ref err) => err.description(),
-            Error::WordList(ref err) => err.description(),
+        match self {
+            Error::IO(err) => err.description(),
+            Error::WordList(err) => err.description(),
             Error::NoWords => "No words to generate",
         }
     }
 
     fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            Error::IO(ref err) => Some(err),
-            Error::WordList(ref err) => Some(err),
+        match self {
+            Error::IO(err) => Some(err),
+            Error::WordList(err) => Some(err),
             Error::NoWords => None,
         }
     }
@@ -89,12 +89,12 @@ pub enum WordListError {
 
 impl fmt::Display for WordListError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            WordListError::InvalidLength(ref length) => {
+        match self {
+            WordListError::InvalidLength(length) => {
                 write!(f, "Word list: invalid length ({})", length)
             }
 
-            WordListError::DuplicateWord(ref word) => {
+            WordListError::DuplicateWord(word) => {
                 write!(f, "Word list: {}: duplicate word", word)
             }
         }
@@ -103,7 +103,7 @@ impl fmt::Display for WordListError {
 
 impl error::Error for WordListError {
     fn description(&self) -> &str {
-        match *self {
+        match self {
             WordListError::InvalidLength(_) => "Invalid word list length",
             WordListError::DuplicateWord(_) => "Duplicate word in the list",
         }

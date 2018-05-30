@@ -92,7 +92,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! diceware = { git = "https://github.com/ejpcmac/diceware.git", tag = "v1.0.0" }
+//! diceware = { git = "https://github.com/ejpcmac/diceware.git", tag = "v1.0.1" }
 //! ```
 //!
 //! Then, add this to your crate root:
@@ -125,12 +125,12 @@
 //!     Err(err) => {
 //!         match err {
 //!             // IO errors can occur when using an external word list.
-//!             Error::IO(ref e) => eprintln!("Error: {}: {}", filename, e),
+//!             Error::IO(e) => eprintln!("Error: {}: {}", filename, e),
 //!
 //!             // Word list errors can occur if the word list is invalid, i.e.
 //!             // its length is different than 7776 words or it contains
 //!             // duplicates.
-//!             Error::WordList(ref e) => eprintln!("Error: {}", e),
+//!             Error::WordList(e) => eprintln!("Error: {}", e),
 //!
 //!             // No words errors can occur if the number of words to generate
 //!             // is 0.
@@ -147,18 +147,18 @@ extern crate unicode_segmentation;
 #[macro_use]
 extern crate proptest;
 
+pub use self::error::*;
+
 use std::collections::HashSet;
-use std::fs::File;
-use std::io::prelude::*;
+use std::fs;
 use std::path::Path;
 
-use rand::Rng;
 use rand::os::OsRng;
+use rand::Rng;
 
 use unicode_segmentation::UnicodeSegmentation;
 
 use self::WordListError::*;
-pub use self::error::*;
 
 mod embedded;
 mod error;
@@ -246,9 +246,9 @@ enum WordList<'a> {
 impl<'a> WordList<'a> {
     /// Gets the word list a a vector of strings.
     fn get(&self) -> Result<Vec<String>> {
-        let word_list = match *self {
+        let word_list = match self {
             WordList::File(filename) => get_wordlist(filename)?,
-            WordList::Embedded(ref list) => get_embedded_list(list),
+            WordList::Embedded(list) => get_embedded_list(list),
         };
 
         // This block limits the scope of the &word_list borrow.
@@ -292,12 +292,12 @@ impl<'a> WordList<'a> {
 ///     Err(err) => {
 ///         match err {
 ///             // IO errors can occur when using an external word list.
-///             Error::IO(ref e) => eprintln!("Error: {}: {}", filename, e),
+///             Error::IO(e) => eprintln!("Error: {}: {}", filename, e),
 ///
 ///             // Word list errors can occur if the word list is invalid, i.e.
 ///             // its length is different than 7776 words or it contains
 ///             // duplicates.
-///             Error::WordList(ref e) => eprintln!("Error: {}", e),
+///             Error::WordList(e) => eprintln!("Error: {}", e),
 ///
 ///             // No words errors can occur if the number of words to generate
 ///             // is 0.
@@ -324,18 +324,16 @@ pub fn make_passphrase(config: Config) -> Result<String> {
         .collect();
 
     if config.with_special_char {
-        let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
-            .chars()
-            .collect();
+        let chars: Vec<char> =
+            "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789".chars().collect();
 
         let c = rng.choose(&chars).unwrap();
 
         let word_idx = rng.gen_range(0, words.len());
         word.push_str(words[word_idx]);
 
-        let indices: Vec<usize> = word.grapheme_indices(true)
-            .map(|(i, _)| i)
-            .collect();
+        let indices: Vec<usize> =
+            word.grapheme_indices(true).map(|(i, _)| i).collect();
 
         let idx = rng.choose(&indices).unwrap();
 
@@ -349,12 +347,8 @@ pub fn make_passphrase(config: Config) -> Result<String> {
 }
 
 /// Gets the word list from a file.
-fn get_wordlist<P>(filename: P) -> Result<Vec<String>>
-where
-    P: AsRef<Path>,
-{
-    let mut content = String::new();
-    File::open(filename)?.read_to_string(&mut content)?;
+fn get_wordlist(filename: impl AsRef<Path>) -> Result<Vec<String>> {
+    let content = fs::read_to_string(filename)?;
 
     let length = content.lines().count();
     if length != 7776 {
@@ -375,7 +369,7 @@ fn get_embedded_list(list: &EmbeddedList) -> Vec<String> {
 
 /// Gets the corresponding embedded word list.
 fn embedded_list(list: &EmbeddedList) -> &[&str; 7776] {
-    match *list {
+    match list {
         EmbeddedList::EN => &embedded::EN,
         EmbeddedList::FR => &embedded::FR,
     }
@@ -398,10 +392,7 @@ mod tests {
         let result = make_passphrase(config);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            "No words to generate"
-        );
+        assert_eq!(result.unwrap_err().description(), "No words to generate");
     }
 
     proptest! {
