@@ -95,11 +95,11 @@ fn main() {
         Ok(passphrase) => println!("{}", passphrase),
         Err(err) => {
             match err {
-                Error::IO(ref e) => {
+                Error::IO(e) => {
                     eprintln!("Error: {}: {}", word_file.unwrap(), e)
                 }
 
-                Error::WordList(ref e) => eprintln!("Error: {}", e),
+                Error::WordList(e) => eprintln!("Error: {}", e),
                 Error::NoWords => eprintln!("Error: {}", err),
             }
 

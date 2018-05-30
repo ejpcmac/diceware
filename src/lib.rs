@@ -125,12 +125,12 @@
 //!     Err(err) => {
 //!         match err {
 //!             // IO errors can occur when using an external word list.
-//!             Error::IO(ref e) => eprintln!("Error: {}: {}", filename, e),
+//!             Error::IO(e) => eprintln!("Error: {}: {}", filename, e),
 //!
 //!             // Word list errors can occur if the word list is invalid, i.e.
 //!             // its length is different than 7776 words or it contains
 //!             // duplicates.
-//!             Error::WordList(ref e) => eprintln!("Error: {}", e),
+//!             Error::WordList(e) => eprintln!("Error: {}", e),
 //!
 //!             // No words errors can occur if the number of words to generate
 //!             // is 0.
@@ -247,9 +247,9 @@ enum WordList<'a> {
 impl<'a> WordList<'a> {
     /// Gets the word list a a vector of strings.
     fn get(&self) -> Result<Vec<String>> {
-        let word_list = match *self {
+        let word_list = match self {
             WordList::File(filename) => get_wordlist(filename)?,
-            WordList::Embedded(ref list) => get_embedded_list(list),
+            WordList::Embedded(list) => get_embedded_list(list),
         };
 
         // This block limits the scope of the &word_list borrow.
@@ -293,12 +293,12 @@ impl<'a> WordList<'a> {
 ///     Err(err) => {
 ///         match err {
 ///             // IO errors can occur when using an external word list.
-///             Error::IO(ref e) => eprintln!("Error: {}: {}", filename, e),
+///             Error::IO(e) => eprintln!("Error: {}: {}", filename, e),
 ///
 ///             // Word list errors can occur if the word list is invalid, i.e.
 ///             // its length is different than 7776 words or it contains
 ///             // duplicates.
-///             Error::WordList(ref e) => eprintln!("Error: {}", e),
+///             Error::WordList(e) => eprintln!("Error: {}", e),
 ///
 ///             // No words errors can occur if the number of words to generate
 ///             // is 0.
@@ -371,7 +371,7 @@ fn get_embedded_list(list: &EmbeddedList) -> Vec<String> {
 
 /// Gets the corresponding embedded word list.
 fn embedded_list(list: &EmbeddedList) -> &[&str; 7776] {
-    match *list {
+    match list {
         EmbeddedList::EN => &embedded::EN,
         EmbeddedList::FR => &embedded::FR,
     }
