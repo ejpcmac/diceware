@@ -150,8 +150,7 @@ extern crate proptest;
 pub use self::error::*;
 
 use std::collections::HashSet;
-use std::fs::File;
-use std::io::prelude::*;
+use std::fs;
 use std::path::Path;
 
 use rand::os::OsRng;
@@ -349,8 +348,7 @@ pub fn make_passphrase(config: Config) -> Result<String> {
 
 /// Gets the word list from a file.
 fn get_wordlist(filename: impl AsRef<Path>) -> Result<Vec<String>> {
-    let mut content = String::new();
-    File::open(filename)?.read_to_string(&mut content)?;
+    let content = fs::read_to_string(filename)?;
 
     let length = content.lines().count();
     if length != 7776 {
