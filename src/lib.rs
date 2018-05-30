@@ -348,10 +348,7 @@ pub fn make_passphrase(config: Config) -> Result<String> {
 }
 
 /// Gets the word list from a file.
-fn get_wordlist<P>(filename: P) -> Result<Vec<String>>
-where
-    P: AsRef<Path>,
-{
+fn get_wordlist(filename: impl AsRef<Path>) -> Result<Vec<String>> {
     let mut content = String::new();
     File::open(filename)?.read_to_string(&mut content)?;
 
