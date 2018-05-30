@@ -50,7 +50,7 @@ dependencies = [
 
 [[package]]
 name = "diceware"
-version = "1.0.0"
+version = "1.0.1-dev"
 dependencies = [
  "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "proptest 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
