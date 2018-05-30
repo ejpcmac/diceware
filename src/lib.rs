@@ -147,18 +147,19 @@ extern crate unicode_segmentation;
 #[macro_use]
 extern crate proptest;
 
+pub use self::error::*;
+
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-use rand::Rng;
 use rand::os::OsRng;
+use rand::Rng;
 
 use unicode_segmentation::UnicodeSegmentation;
 
 use self::WordListError::*;
-pub use self::error::*;
 
 mod embedded;
 mod error;
@@ -324,18 +325,16 @@ pub fn make_passphrase(config: Config) -> Result<String> {
         .collect();
 
     if config.with_special_char {
-        let chars: Vec<char> = "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789"
-            .chars()
-            .collect();
+        let chars: Vec<char> =
+            "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789".chars().collect();
 
         let c = rng.choose(&chars).unwrap();
 
         let word_idx = rng.gen_range(0, words.len());
         word.push_str(words[word_idx]);
 
-        let indices: Vec<usize> = word.grapheme_indices(true)
-            .map(|(i, _)| i)
-            .collect();
+        let indices: Vec<usize> =
+            word.grapheme_indices(true).map(|(i, _)| i).collect();
 
         let idx = rng.choose(&indices).unwrap();
 
@@ -398,10 +397,7 @@ mod tests {
         let result = make_passphrase(config);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            "No words to generate"
-        );
+        assert_eq!(result.unwrap_err().description(), "No words to generate");
     }
 
     proptest! {
