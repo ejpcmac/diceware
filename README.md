@@ -78,7 +78,7 @@ Add this crate as a dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-diceware = { git = "https://github.com/ejpcmac/diceware.git", tag = "v1.0.0" }
+diceware = { git = "https://github.com/ejpcmac/diceware.git", tag = "v1.0.1" }
 ```
 
 Then, add this to your crate root:
