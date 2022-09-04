@@ -144,7 +144,6 @@ extern crate rand;
 extern crate unicode_segmentation;
 
 #[cfg(test)]
-#[macro_use]
 extern crate proptest;
 
 pub use self::error::*;
@@ -396,7 +395,6 @@ mod tests {
     }
 
     proptest! {
-        #![proptest_config(proptest::test_runner::Config::with_cases(100))]
         #[test]
         fn makes_a_passphrase(ref list in arb_list(), n in 1..50usize) {
             let word_list = embedded_list(list);
@@ -415,7 +413,6 @@ mod tests {
     }
 
     proptest! {
-        #![proptest_config(proptest::test_runner::Config::with_cases(100))]
         #[test]
         fn makes_a_passphrase_with_special_char(
             ref list in arb_list(),
