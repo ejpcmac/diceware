@@ -1,5 +1,5 @@
 // diceware - A Diceware passphrase generator.
-// Copyright (C) 2018 Jean-Philippe Cugnet <jean-philippe@cugnet.eu>
+// Copyright (C) 2018, 2022 Jean-Philippe Cugnet <jean-philippe@cugnet.eu>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

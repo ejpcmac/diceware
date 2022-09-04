@@ -128,6 +128,6 @@ match diceware::make_passphrase(config) {
 
 ## License
 
-Copyright © 2018 Jean-Philippe Cugnet
+Copyright © 2018, 2022 Jean-Philippe Cugnet
 
 This project is licensed under the [GNU General Public License 3.0](LICENSE).
