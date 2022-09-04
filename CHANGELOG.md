@@ -21,6 +21,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 * Initial version with English and French embedded word lists.
 
-[Unreleased]: https://github.com/ejpcmac/diceware/compare/master...develop
+[Unreleased]: https://github.com/ejpcmac/diceware/compare/main...develop
 [1.0.1]: https://github.com/ejpcmac/diceware/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/ejpcmac/diceware/releases/tag/v1.0.0
