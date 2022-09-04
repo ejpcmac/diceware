@@ -2,7 +2,7 @@
 
 A Diceware passphrase generator.
 
-# About
+## About
 
 [Diceware](http://world.std.com/~reinhold/diceware.html) is a method by Arnold
 G. Reinhold for generating passphrases from a dice and a word list.
@@ -12,7 +12,7 @@ generating strong passphrases, it is sometimes convenient and acceptable to
 generate passphrases that are easy to remember, yet less secure than a true
 Diceware passphrase.
 
-# Features
+## Features
 
 This Diceware implementation enables to generate passphrases from a Diceware
 word list, with an optional special character inserted at any position in any
@@ -36,9 +36,15 @@ do not need to trust its creator. This is also the case for embedded lists, so
 you do not have to trust me either: just read the source code and acknowledge by
 yourself you can use trustless word lists.
 
-# Usage
+## Usage
 
-## As a binary
+### As a binary
+
+To install the `diceware` CLI, run:
+
+```sh
+$ cargo install --git https://github.com/ejpcmac/diceware.git
+```
 
 The simplest way to use the `diceware` binary is to just pass the number of
 desired words as an argument:
@@ -72,22 +78,16 @@ $ diceware 8 -f word_list.txt
 yah omaha aiken wood noble shoot devil filch
 ```
 
-## As a library
+### As a library
 
 Add this crate as a dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-diceware = { git = "https://github.com/ejpcmac/diceware.git", tag = "v1.0.1" }
+diceware = { git = "https://github.com/ejpcmac/diceware.git", tag = "v1.0.2" }
 ```
 
-Then, add this to your crate root:
-
-```rust
-extern crate diceware;
-```
-
-### Example
+#### Example
 
 ```rust
 use diceware::{Config, EmbeddedList, Error};
@@ -105,22 +105,22 @@ let config = Config::with_filename(filename, 8, true);
 // Then, try to generate the passphrase:
 match diceware::make_passphrase(config) {
     // The happy path: you get your passphrase.
-    Ok(passphrase) => println!("{}", passphrase),
+    Ok(passphrase) => println!("{passphrase}"),
 
     // Some errors can occur:
     Err(err) => {
         match err {
             // IO errors can occur when using an external word list.
-            Error::IO(ref e) => eprintln!("Error: {}: {}", filename, e),
+            Error::IO(ref e) => eprintln!("Error: {filename}: {e}"),
 
             // Word list errors can occur if the word list is invalid, i.e.
             // its length is different than 7776 words or it contains
             // duplicates.
-            Error::WordList(ref e) => eprintln!("Error: {}", e),
+            Error::WordList(ref e) => eprintln!("Error: {e}"),
 
             // No words errors can occur if the number of words to generate
             // is 0.
-            Error::NoWords => eprintln!("Error: {}", err),
+            Error::NoWords => eprintln!("Error: {err}"),
         }
     }
 };
@@ -128,6 +128,6 @@ match diceware::make_passphrase(config) {
 
 ## License
 
-Copyright © 2018 Jean-Philippe Cugnet
+Copyright © 2018, 2022 Jean-Philippe Cugnet
 
 This project is licensed under the [GNU General Public License 3.0](LICENSE).

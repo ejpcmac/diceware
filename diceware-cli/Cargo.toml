@@ -1,0 +1,16 @@
+[package]
+name = "diceware-cli"
+version = "1.0.2"
+authors = ["Jean-Philippe Cugnet <jean-philippe@cugnet.eu>"]
+edition = "2021"
+license = "GPL-3.0-only"
+description = "A Diceware passphrase generator CLI."
+
+[dependencies]
+clap = { version = "3.2", features = ["derive"] }
+diceware = { path = "../diceware" }
+owo-colors = { version = "3.5.0", features = ["supports-colors"] }
+
+[[bin]]
+name = "diceware"
+path = "src/main.rs"

@@ -14,154 +14,44 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//! A Diceware passphrase generator.
-//!
-//! # About
-//!
-//! [Diceware](http://world.std.com/~reinhold/diceware.html) is a method by
-//! Arnold G. Reinhold for generating passphrases from a dice and a word list.
-//!
-//! Although you should not trust your computer’s pseudo-random number generator
-//! for generating strong passphrases, it is sometimes convenient and acceptable
-//! to generate passphrases that are easy to remember, yet less secure than a
-//! true Diceware passphrase.
-//!
-//! # Features
-//!
-//! This Diceware implementation enables to generate passphrases from a Diceware
-//! word list, with an optional special character inserted at any position in
-//! any word. This differs from the dice version, where the special character
-//! can be inserted only in the six first characters of the six first words.
-//!
-//! This implementation embeds two word lists:
-//!
-//!   * the original Diceware list,
-//!   * the French word list from
-//!     [Matthieu Weber](http://weber.fi.eu.org/index.shtml.en#projects), with
-//!     `Église` changed to `Eglise` to avoid encoding and keyboard
-//!     accessibility issues.
-//!
-//! In addition to these lists, you can use any other list from a text file
-//! featuring a word by line. A word list **must** contain exactly 7776 unique
-//! words.
-//!
-//! Before each passphrase generation, the chosen word list is checked so that
-//! you do not need to trust its creator. This is also the case for embedded
-//! lists, so you do not have to trust me either: just read the source code and
-//! acknowledge by yourself you can use trustless word lists.
-//!
-//! # Usage
-//!
-//! ## As a binary
-//!
-//! The simplest way to use the `diceware` binary is to just pass the number of
-//! desired words as an argument:
-//!
-//! ```sh
-//! $ diceware 8
-//! save andrew liar grater keys chad poetry stole
-//! ```
-//!
-//! In this case, the embedded original Diceware list is used and no special
-//! character is added.
-//!
-//! To add a special character, use the `-s` switch:
-//!
-//! ```sh
-//! $ diceware -s 8
-//! clerk ion ruddy aid gauss wino listen fl>o
-//! ```
-//!
-//! To use the embedded French word list, use `--fr`:
-//!
-//! ```sh
-//! $ diceware --fr 8
-//! jarret papa cv asti brin coron rente don
-//! ```
-//!
-//! You can also use any external word list:
-//!
-//! ```sh
-//! $ diceware 8 -f word_list.txt
-//! yah omaha aiken wood noble shoot devil filch
-//! ```
-//!
-//! ## As a library
-//!
-//! Add this crate as a dependency to your `Cargo.toml`:
-//!
-//! ```toml
-//! [dependencies]
-//! diceware = { git = "https://github.com/ejpcmac/diceware.git", tag = "v1.0.1" }
-//! ```
-//!
-//! Then, add this to your crate root:
-//!
-//! ```rust
-//! extern crate diceware;
-//! ```
-//!
-//! ### Example
-//!
-//! ```rust
-//! use diceware::{Config, EmbeddedList, Error};
-//!
-//! // First, generate a config. You can generate one with an embedded list,
-//! // here the English one with 8 words and without a special character:
-//! let config = Config::with_embedded(EmbeddedList::EN, 8, false);
-//!
-//! // Alternatively, you can generate a config using an external word list. For
-//! // instance, to generate 6 words from the file `list.txt` with an additional
-//! // special character:
-//! let filename = "list.txt";
-//! let config = Config::with_filename(filename, 8, true);
-//!
-//! // Then, try to generate the passphrase:
-//! match diceware::make_passphrase(config) {
-//!     // The happy path: you get your passphrase.
-//!     Ok(passphrase) => println!("{}", passphrase),
-//!
-//!     // Some errors can occur:
-//!     Err(err) => {
-//!         match err {
-//!             // IO errors can occur when using an external word list.
-//!             Error::IO(e) => eprintln!("Error: {}: {}", filename, e),
-//!
-//!             // Word list errors can occur if the word list is invalid, i.e.
-//!             // its length is different than 7776 words or it contains
-//!             // duplicates.
-//!             Error::WordList(e) => eprintln!("Error: {}", e),
-//!
-//!             // No words errors can occur if the number of words to generate
-//!             // is 0.
-//!             Error::NoWords => eprintln!("Error: {}", err),
-//!         }
-//!     }
-//! };
-//! ```
-
-extern crate rand;
-extern crate unicode_segmentation;
-
-#[cfg(test)]
-#[macro_use]
-extern crate proptest;
-
-pub use self::error::*;
-
-use std::collections::HashSet;
-use std::fs;
-use std::path::Path;
-
-use rand::os::OsRng;
-use rand::Rng;
-
-use unicode_segmentation::UnicodeSegmentation;
-
-use self::WordListError::*;
+#![doc = include_str!("../../README.md")]
+#![warn(rust_2018_idioms)]
+#![warn(clippy::redundant_pub_crate)]
+#![warn(clippy::unwrap_used)]
+#![warn(clippy::use_self)]
+#![deny(missing_docs)]
+#![deny(unused_must_use)]
+#![forbid(unsafe_code)]
 
 mod embedded;
 mod error;
+
+pub use self::error::*;
+
+use std::{collections::HashSet, fs, path::Path};
+
+use rand::{prelude::*, rngs::OsRng};
+use unicode_segmentation::UnicodeSegmentation;
+
+use self::error::WordListError::*;
+
+/// Configuration for the passphrase generator.
+///
+/// To create a configuration, you must use one of the constructors:
+///
+/// * [`Config::with_filename`](#method.with_filename)
+/// * [`Config::with_embedded`](#method.with_embedded)
+pub struct Config<'a> {
+    word_list: WordList<'a>,
+    words: usize,
+    with_special_char: bool,
+}
+
+/// A word list.
+enum WordList<'a> {
+    File(&'a str),
+    Embedded(EmbeddedList),
+}
 
 /// The list of embedded word lists.
 #[derive(Clone, Debug)]
@@ -175,18 +65,6 @@ pub enum EmbeddedList {
     /// To avoid encoding or accessibility problems, `Église` has been replaced
     /// by `Eglise` in the list.
     FR,
-}
-
-/// Configuration for the passphrase generator.
-///
-/// To create a configuration, you must use one of the constructors:
-///
-/// * [`Config::with_filename`](#method.with_filename)
-/// * [`Config::with_embedded`](#method.with_embedded)
-pub struct Config<'a> {
-    word_list: WordList<'a>,
-    words: usize,
-    with_special_char: bool,
 }
 
 impl<'a> Config<'a> {
@@ -237,14 +115,8 @@ impl<'a> Config<'a> {
     }
 }
 
-/// A word list.
-enum WordList<'a> {
-    File(&'a str),
-    Embedded(EmbeddedList),
-}
-
 impl<'a> WordList<'a> {
-    /// Gets the word list a a vector of strings.
+    /// Gets the word list as a vector of strings.
     fn get(&self) -> Result<Vec<String>> {
         let word_list = match self {
             WordList::File(filename) => get_wordlist(filename)?,
@@ -306,12 +178,12 @@ impl<'a> WordList<'a> {
 ///     }
 /// };
 /// ```
-pub fn make_passphrase(config: Config) -> Result<String> {
+pub fn make_passphrase(config: Config<'_>) -> Result<String> {
     if config.words < 1 {
         return Err(Error::NoWords);
     }
 
-    let mut rng = OsRng::new().unwrap();
+    let mut rng = OsRng;
 
     // We need to declare this mutable string before `word_list` if we want to
     // use it to replace a word with its version containing a special character.
@@ -319,7 +191,11 @@ pub fn make_passphrase(config: Config) -> Result<String> {
 
     let word_list = config.word_list.get()?;
     let mut words: Vec<&str> = (0..config.words)
-        .map(|_| rng.choose(&word_list).unwrap())
+        .map(|_| {
+            // NOTE(unwrap): word_list cannot be empty.
+            #[allow(clippy::unwrap_used)]
+            word_list.choose(&mut rng).unwrap()
+        })
         .map(AsRef::as_ref)
         .collect();
 
@@ -327,15 +203,20 @@ pub fn make_passphrase(config: Config) -> Result<String> {
         let chars: Vec<char> =
             "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789".chars().collect();
 
-        let c = rng.choose(&chars).unwrap();
+        // NOTE(unwrap): chars is defined above and not empty.
+        #[allow(clippy::unwrap_used)]
+        let c = chars.choose(&mut rng).unwrap();
 
-        let word_idx = rng.gen_range(0, words.len());
+        let word_idx = rng.gen_range(0..words.len());
         word.push_str(words[word_idx]);
 
         let indices: Vec<usize> =
             word.grapheme_indices(true).map(|(i, _)| i).collect();
 
-        let idx = rng.choose(&indices).unwrap();
+        // NOTE(unwrap): As word containts at least one character, there will be
+        // at least one character indice in indices.
+        #[allow(clippy::unwrap_used)]
+        let idx = indices.choose(&mut rng).unwrap();
 
         word.insert(*idx, *c);
         words[word_idx] = &word;
@@ -377,9 +258,10 @@ fn embedded_list(list: &EmbeddedList) -> &[&str; 7776] {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
+
     use super::*;
     use proptest::prelude::*;
-    use std::error::Error;
 
     /// Arbitrary embedded word list generator.
     fn arb_list() -> BoxedStrategy<EmbeddedList> {
@@ -392,11 +274,10 @@ mod tests {
         let result = make_passphrase(config);
 
         assert!(result.is_err());
-        assert_eq!(result.unwrap_err().description(), "No words to generate");
+        assert_eq!(result.unwrap_err().to_string(), "No words to generate");
     }
 
     proptest! {
-        #![proptest_config(proptest::test_runner::Config::with_cases(100))]
         #[test]
         fn makes_a_passphrase(ref list in arb_list(), n in 1..50usize) {
             let word_list = embedded_list(list);
@@ -414,8 +295,7 @@ mod tests {
         }
     }
 
-    proptest!{
-        #![proptest_config(proptest::test_runner::Config::with_cases(100))]
+    proptest! {
         #[test]
         fn makes_a_passphrase_with_special_char(
             ref list in arb_list(),
@@ -431,7 +311,7 @@ mod tests {
             let passphrase = result.unwrap();
             let not_in_wordlist: Vec<&str> = passphrase
                 .split_whitespace()
-                .filter(|w| !word_list.contains(&w))
+                .filter(|w| !word_list.contains(w))
                 .collect();
 
             prop_assert_eq!(not_in_wordlist.len(), 1);

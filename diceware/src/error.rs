@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::error;
-use std::fmt;
-use std::io;
-use std::result;
+use std::{error, fmt, io, result};
 
 /// Short hand for the
 /// [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html) type.
@@ -37,46 +34,6 @@ pub enum Error {
     NoWords,
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::IO(err) => err.fmt(f),
-            Error::WordList(err) => err.fmt(f),
-            Error::NoWords => write!(f, "No words to generate"),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        match self {
-            Error::IO(err) => err.description(),
-            Error::WordList(err) => err.description(),
-            Error::NoWords => "No words to generate",
-        }
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::IO(err) => Some(err),
-            Error::WordList(err) => Some(err),
-            Error::NoWords => None,
-        }
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Error {
-        Error::IO(err)
-    }
-}
-
-impl From<WordListError> for Error {
-    fn from(err: WordListError) -> Error {
-        Error::WordList(err)
-    }
-}
-
 /// Word list errors.
 #[derive(Debug)]
 pub enum WordListError {
@@ -87,14 +44,46 @@ pub enum WordListError {
     DuplicateWord(String),
 }
 
-impl fmt::Display for WordListError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            WordListError::InvalidLength(length) => {
+            Self::IO(err) => err.fmt(f),
+            Self::WordList(err) => err.fmt(f),
+            Self::NoWords => write!(f, "No words to generate"),
+        }
+    }
+}
+
+impl error::Error for Error {
+    fn cause(&self) -> Option<&dyn error::Error> {
+        match self {
+            Self::IO(err) => Some(err),
+            Self::WordList(err) => Some(err),
+            Self::NoWords => None,
+        }
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(err: io::Error) -> Self {
+        Self::IO(err)
+    }
+}
+
+impl From<WordListError> for Error {
+    fn from(err: WordListError) -> Self {
+        Self::WordList(err)
+    }
+}
+
+impl fmt::Display for WordListError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InvalidLength(length) => {
                 write!(f, "Word list: invalid length ({})", length)
             }
 
-            WordListError::DuplicateWord(word) => {
+            Self::DuplicateWord(word) => {
                 write!(f, "Word list: {}: duplicate word", word)
             }
         }
@@ -104,8 +93,8 @@ impl fmt::Display for WordListError {
 impl error::Error for WordListError {
     fn description(&self) -> &str {
         match self {
-            WordListError::InvalidLength(_) => "Invalid word list length",
-            WordListError::DuplicateWord(_) => "Duplicate word in the list",
+            Self::InvalidLength(_) => "Invalid word list length",
+            Self::DuplicateWord(_) => "Duplicate word in the list",
         }
     }
 }
