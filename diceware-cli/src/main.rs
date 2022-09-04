@@ -32,7 +32,7 @@ use diceware::{Config, EmbeddedList, Error};
 
 /// A Diceware passphrase generator.
 #[derive(Debug, Parser)]
-#[clap(author, version)]
+#[clap(name = "diceware", author, version)]
 struct Cli {
     /// The number of words to generate.
     words: usize,

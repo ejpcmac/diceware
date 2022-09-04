@@ -95,10 +95,17 @@ dependencies = [
 name = "diceware"
 version = "1.0.2-dev"
 dependencies = [
- "clap",
  "proptest",
  "rand",
  "unicode-segmentation",
+]
+
+[[package]]
+name = "diceware-cli"
+version = "1.0.2-dev"
+dependencies = [
+ "clap",
+ "diceware",
 ]
 
 [[package]]
