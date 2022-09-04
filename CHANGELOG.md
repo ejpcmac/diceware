@@ -13,6 +13,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 * Update the dependencies.
 * Update to Rust 2021.
 * Refactor some code.
+* Split the CLI and library in two packages.
+* [CLI] Colorise error messages when colors are supported.
 
 ## [1.0.1] - 2018-05-30
 
