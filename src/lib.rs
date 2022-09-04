@@ -240,7 +240,7 @@ impl<'a> Config<'a> {
 }
 
 impl<'a> WordList<'a> {
-    /// Gets the word list a a vector of strings.
+    /// Gets the word list as a vector of strings.
     fn get(&self) -> Result<Vec<String>> {
         let word_list = match self {
             WordList::File(filename) => get_wordlist(filename)?,
