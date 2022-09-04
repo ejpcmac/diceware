@@ -93,7 +93,7 @@ dependencies = [
 
 [[package]]
 name = "diceware"
-version = "1.0.2-dev"
+version = "1.0.2"
 dependencies = [
  "proptest",
  "rand",
@@ -102,7 +102,7 @@ dependencies = [
 
 [[package]]
 name = "diceware-cli"
-version = "1.0.2-dev"
+version = "1.0.2"
 dependencies = [
  "clap",
  "diceware",
