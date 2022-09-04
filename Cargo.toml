@@ -7,7 +7,7 @@ license = "GPL-3.0-only"
 description = "A Diceware passphrase generator."
 
 [dependencies]
-clap = "3.2"
+clap = { version = "3.2", features = ["derive"] }
 rand = "0.8"
 unicode-segmentation = "1.2"
 
