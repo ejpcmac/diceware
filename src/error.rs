@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::error;
-use std::fmt;
-use std::io;
-use std::result;
+use std::{error, fmt, io, result};
 
 /// Short hand for the
 /// [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html) type.
@@ -35,6 +32,16 @@ pub enum Error {
 
     /// Error for when the number of words to generate is 0.
     NoWords,
+}
+
+/// Word list errors.
+#[derive(Debug)]
+pub enum WordListError {
+    /// Error for when the word list is not 7776-word long.
+    InvalidLength(usize),
+
+    /// Error for when the word list contains duplicates.
+    DuplicateWord(String),
 }
 
 impl fmt::Display for Error {
@@ -67,16 +74,6 @@ impl From<WordListError> for Error {
     fn from(err: WordListError) -> Self {
         Self::WordList(err)
     }
-}
-
-/// Word list errors.
-#[derive(Debug)]
-pub enum WordListError {
-    /// Error for when the word list is not 7776-word long.
-    InvalidLength(usize),
-
-    /// Error for when the word list contains duplicates.
-    DuplicateWord(String),
 }
 
 impl fmt::Display for WordListError {

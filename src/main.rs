@@ -26,6 +26,7 @@
 use std::process;
 
 use clap::{App, Arg, ArgGroup};
+
 use diceware::{Config, EmbeddedList, Error};
 
 fn main() {

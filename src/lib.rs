@@ -147,21 +147,35 @@
 #![deny(unused_must_use)]
 #![forbid(unsafe_code)]
 
-pub use self::error::*;
-
-use std::collections::HashSet;
-use std::fs;
-use std::path::Path;
-
-use rand::prelude::*;
-use rand::rngs::OsRng;
-
-use unicode_segmentation::UnicodeSegmentation;
-
-use self::WordListError::*;
-
 mod embedded;
 mod error;
+
+pub use self::error::*;
+
+use std::{collections::HashSet, fs, path::Path};
+
+use rand::{prelude::*, rngs::OsRng};
+use unicode_segmentation::UnicodeSegmentation;
+
+use self::error::WordListError::*;
+
+/// Configuration for the passphrase generator.
+///
+/// To create a configuration, you must use one of the constructors:
+///
+/// * [`Config::with_filename`](#method.with_filename)
+/// * [`Config::with_embedded`](#method.with_embedded)
+pub struct Config<'a> {
+    word_list: WordList<'a>,
+    words: usize,
+    with_special_char: bool,
+}
+
+/// A word list.
+enum WordList<'a> {
+    File(&'a str),
+    Embedded(EmbeddedList),
+}
 
 /// The list of embedded word lists.
 #[derive(Clone, Debug)]
@@ -175,18 +189,6 @@ pub enum EmbeddedList {
     /// To avoid encoding or accessibility problems, `Église` has been replaced
     /// by `Eglise` in the list.
     FR,
-}
-
-/// Configuration for the passphrase generator.
-///
-/// To create a configuration, you must use one of the constructors:
-///
-/// * [`Config::with_filename`](#method.with_filename)
-/// * [`Config::with_embedded`](#method.with_embedded)
-pub struct Config<'a> {
-    word_list: WordList<'a>,
-    words: usize,
-    with_special_char: bool,
 }
 
 impl<'a> Config<'a> {
@@ -235,12 +237,6 @@ impl<'a> Config<'a> {
             with_special_char,
         }
     }
-}
-
-/// A word list.
-enum WordList<'a> {
-    File(&'a str),
-    Embedded(EmbeddedList),
 }
 
 impl<'a> WordList<'a> {
