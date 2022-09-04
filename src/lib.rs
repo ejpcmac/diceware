@@ -140,11 +140,12 @@
 //! };
 //! ```
 
-extern crate rand;
-extern crate unicode_segmentation;
-
-#[cfg(test)]
-extern crate proptest;
+#![warn(rust_2018_idioms)]
+#![warn(clippy::redundant_pub_crate)]
+#![warn(clippy::use_self)]
+#![deny(missing_docs)]
+#![deny(unused_must_use)]
+#![forbid(unsafe_code)]
 
 pub use self::error::*;
 
@@ -305,7 +306,7 @@ impl<'a> WordList<'a> {
 ///     }
 /// };
 /// ```
-pub fn make_passphrase(config: Config) -> Result<String> {
+pub fn make_passphrase(config: Config<'_>) -> Result<String> {
     if config.words < 1 {
         return Err(Error::NoWords);
     }

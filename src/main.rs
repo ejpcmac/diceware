@@ -14,8 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-extern crate clap;
-extern crate diceware;
+//! The Diceware CLI.
+
+#![warn(rust_2018_idioms)]
+#![warn(clippy::redundant_pub_crate)]
+#![warn(clippy::use_self)]
+#![deny(missing_docs)]
+#![deny(unused_must_use)]
+#![forbid(unsafe_code)]
 
 use std::process;
 

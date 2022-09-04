@@ -38,11 +38,11 @@ pub enum Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::IO(err) => err.fmt(f),
-            Error::WordList(err) => err.fmt(f),
-            Error::NoWords => write!(f, "No words to generate"),
+            Self::IO(err) => err.fmt(f),
+            Self::WordList(err) => err.fmt(f),
+            Self::NoWords => write!(f, "No words to generate"),
         }
     }
 }
@@ -50,22 +50,22 @@ impl fmt::Display for Error {
 impl error::Error for Error {
     fn cause(&self) -> Option<&dyn error::Error> {
         match self {
-            Error::IO(err) => Some(err),
-            Error::WordList(err) => Some(err),
-            Error::NoWords => None,
+            Self::IO(err) => Some(err),
+            Self::WordList(err) => Some(err),
+            Self::NoWords => None,
         }
     }
 }
 
 impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Error {
-        Error::IO(err)
+    fn from(err: io::Error) -> Self {
+        Self::IO(err)
     }
 }
 
 impl From<WordListError> for Error {
-    fn from(err: WordListError) -> Error {
-        Error::WordList(err)
+    fn from(err: WordListError) -> Self {
+        Self::WordList(err)
     }
 }
 
@@ -80,13 +80,13 @@ pub enum WordListError {
 }
 
 impl fmt::Display for WordListError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            WordListError::InvalidLength(length) => {
+            Self::InvalidLength(length) => {
                 write!(f, "Word list: invalid length ({})", length)
             }
 
-            WordListError::DuplicateWord(word) => {
+            Self::DuplicateWord(word) => {
                 write!(f, "Word list: {}: duplicate word", word)
             }
         }
@@ -96,8 +96,8 @@ impl fmt::Display for WordListError {
 impl error::Error for WordListError {
     fn description(&self) -> &str {
         match self {
-            WordListError::InvalidLength(_) => "Invalid word list length",
-            WordListError::DuplicateWord(_) => "Duplicate word in the list",
+            Self::InvalidLength(_) => "Invalid word list length",
+            Self::DuplicateWord(_) => "Duplicate word in the list",
         }
     }
 }
