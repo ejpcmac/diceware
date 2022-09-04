@@ -11,6 +11,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 * Update the dependencies.
+* Update to Rust 2021.
+* Refactor some code.
 
 ## [1.0.1] - 2018-05-30
 
