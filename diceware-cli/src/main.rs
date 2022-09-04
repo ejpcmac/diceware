@@ -27,6 +27,7 @@
 use std::process;
 
 use clap::Parser;
+use owo_colors::{OwoColorize, Stream::Stderr, Style};
 
 use diceware::{Config, EmbeddedList, Error};
 
@@ -70,19 +71,25 @@ fn main() {
     match diceware::make_passphrase(config) {
         Ok(passphrase) => println!("{}", passphrase),
         Err(err) => {
-            match err {
+            let message = match err {
                 Error::IO(e) => {
                     let word_file = cli
                         .word_file
                         .expect("IO error without using a word_file.");
 
-                    eprintln!("Error: {}: {}", word_file, e)
+                    format!("{word_file}: {e}")
                 }
 
-                Error::WordList(e) => eprintln!("Error: {}", e),
-                Error::NoWords => eprintln!("Error: {}", err),
-            }
+                Error::WordList(e) => e.to_string(),
+                Error::NoWords => err.to_string(),
+            };
 
+            eprintln!(
+                "{} {message}",
+                "error:".if_supports_color(Stderr, |text| {
+                    text.style(Style::new().red().bold())
+                })
+            );
             process::exit(1);
         }
     };
