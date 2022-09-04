@@ -1,13 +1,15 @@
 [package]
 name = "diceware"
 version = "1.0.2-dev"
-license = "GPL-3.0"
 authors = ["Jean-Philippe Cugnet <jean-philippe@cugnet.eu>"]
+edition = "2021"
+license = "GPL-3.0-only"
+description = "A Diceware passphrase generator."
 
 [dependencies]
 clap = "3.2"
 rand = "0.8"
-unicode-segmentation = "1.2.0"
+unicode-segmentation = "1.2"
 
 [dev-dependencies]
 proptest = "1.0"
