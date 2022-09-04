@@ -153,8 +153,8 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 
-use rand::os::OsRng;
-use rand::Rng;
+use rand::prelude::*;
+use rand::rngs::OsRng;
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -311,7 +311,7 @@ pub fn make_passphrase(config: Config) -> Result<String> {
         return Err(Error::NoWords);
     }
 
-    let mut rng = OsRng::new().unwrap();
+    let mut rng = OsRng;
 
     // We need to declare this mutable string before `word_list` if we want to
     // use it to replace a word with its version containing a special character.
@@ -319,7 +319,7 @@ pub fn make_passphrase(config: Config) -> Result<String> {
 
     let word_list = config.word_list.get()?;
     let mut words: Vec<&str> = (0..config.words)
-        .map(|_| rng.choose(&word_list).unwrap())
+        .map(|_| word_list.choose(&mut rng).unwrap())
         .map(AsRef::as_ref)
         .collect();
 
@@ -327,15 +327,15 @@ pub fn make_passphrase(config: Config) -> Result<String> {
         let chars: Vec<char> =
             "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789".chars().collect();
 
-        let c = rng.choose(&chars).unwrap();
+        let c = chars.choose(&mut rng).unwrap();
 
-        let word_idx = rng.gen_range(0, words.len());
+        let word_idx = rng.gen_range(0..words.len());
         word.push_str(words[word_idx]);
 
         let indices: Vec<usize> =
             word.grapheme_indices(true).map(|(i, _)| i).collect();
 
-        let idx = rng.choose(&indices).unwrap();
+        let idx = indices.choose(&mut rng).unwrap();
 
         word.insert(*idx, *c);
         words[word_idx] = &word;
@@ -414,7 +414,7 @@ mod tests {
         }
     }
 
-    proptest!{
+    proptest! {
         #![proptest_config(proptest::test_runner::Config::with_cases(100))]
         #[test]
         fn makes_a_passphrase_with_special_char(

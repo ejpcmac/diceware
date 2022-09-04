@@ -6,7 +6,7 @@ authors = ["Jean-Philippe Cugnet <jean-philippe@cugnet.eu>"]
 
 [dependencies]
 clap = "3.2"
-rand = "0.5.0"
+rand = "0.8"
 unicode-segmentation = "1.2.0"
 
 [dev-dependencies]
