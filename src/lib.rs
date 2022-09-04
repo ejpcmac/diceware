@@ -142,6 +142,7 @@
 
 #![warn(rust_2018_idioms)]
 #![warn(clippy::redundant_pub_crate)]
+#![warn(clippy::unwrap_used)]
 #![warn(clippy::use_self)]
 #![deny(missing_docs)]
 #![deny(unused_must_use)]
@@ -315,7 +316,11 @@ pub fn make_passphrase(config: Config<'_>) -> Result<String> {
 
     let word_list = config.word_list.get()?;
     let mut words: Vec<&str> = (0..config.words)
-        .map(|_| word_list.choose(&mut rng).unwrap())
+        .map(|_| {
+            // NOTE(unwrap): word_list cannot be empty.
+            #[allow(clippy::unwrap_used)]
+            word_list.choose(&mut rng).unwrap()
+        })
         .map(AsRef::as_ref)
         .collect();
 
@@ -323,6 +328,8 @@ pub fn make_passphrase(config: Config<'_>) -> Result<String> {
         let chars: Vec<char> =
             "~!#$%^&*()-=+[]\\{}:;\"'<>?/0123456789".chars().collect();
 
+        // NOTE(unwrap): chars is defined above and not empty.
+        #[allow(clippy::unwrap_used)]
         let c = chars.choose(&mut rng).unwrap();
 
         let word_idx = rng.gen_range(0..words.len());
@@ -331,6 +338,9 @@ pub fn make_passphrase(config: Config<'_>) -> Result<String> {
         let indices: Vec<usize> =
             word.grapheme_indices(true).map(|(i, _)| i).collect();
 
+        // NOTE(unwrap): As word containts at least one character, there will be
+        // at least one character indice in indices.
+        #[allow(clippy::unwrap_used)]
         let idx = indices.choose(&mut rng).unwrap();
 
         word.insert(*idx, *c);
@@ -373,6 +383,8 @@ fn embedded_list(list: &EmbeddedList) -> &[&str; 7776] {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
+
     use super::*;
     use proptest::prelude::*;
 

@@ -18,6 +18,7 @@
 
 #![warn(rust_2018_idioms)]
 #![warn(clippy::redundant_pub_crate)]
+#![warn(clippy::unwrap_used)]
 #![warn(clippy::use_self)]
 #![deny(missing_docs)]
 #![deny(unused_must_use)]
@@ -71,7 +72,11 @@ fn main() {
         Err(err) => {
             match err {
                 Error::IO(e) => {
-                    eprintln!("Error: {}: {}", cli.word_file.unwrap(), e)
+                    let word_file = cli
+                        .word_file
+                        .expect("IO error without using a word_file.");
+
+                    eprintln!("Error: {}: {}", word_file, e)
                 }
 
                 Error::WordList(e) => eprintln!("Error: {}", e),
