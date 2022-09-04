@@ -34,7 +34,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("word_file")
-                .short("f")
+                .short('f')
                 .long("file")
                 .takes_value(true)
                 .help("Uses a diceware word file"),
@@ -58,7 +58,7 @@ fn main() {
         .arg(
             Arg::with_name("with-special-char")
                 .long("with-special-char")
-                .short("s")
+                .short('s')
                 .help("Adds a special character to the passphrase"),
         )
         .get_matches();
