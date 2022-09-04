@@ -69,7 +69,7 @@ fn main() {
     };
 
     match diceware::make_passphrase(config) {
-        Ok(passphrase) => println!("{}", passphrase),
+        Ok(passphrase) => println!("{passphrase}"),
         Err(err) => {
             let message = match err {
                 Error::IO(e) => {
