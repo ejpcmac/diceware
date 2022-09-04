@@ -378,7 +378,6 @@ fn embedded_list(list: &EmbeddedList) -> &[&str; 7776] {
 mod tests {
     use super::*;
     use proptest::prelude::*;
-    use std::error::Error;
 
     /// Arbitrary embedded word list generator.
     fn arb_list() -> BoxedStrategy<EmbeddedList> {
@@ -391,7 +390,7 @@ mod tests {
         let result = make_passphrase(config);
 
         assert!(result.is_err());
-        assert_eq!(result.unwrap_err().description(), "No words to generate");
+        assert_eq!(result.unwrap_err().to_string(), "No words to generate");
     }
 
     proptest! {
@@ -428,7 +427,7 @@ mod tests {
             let passphrase = result.unwrap();
             let not_in_wordlist: Vec<&str> = passphrase
                 .split_whitespace()
-                .filter(|w| !word_list.contains(&w))
+                .filter(|w| !word_list.contains(w))
                 .collect();
 
             prop_assert_eq!(not_in_wordlist.len(), 1);
